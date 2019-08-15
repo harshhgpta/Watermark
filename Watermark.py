@@ -4,7 +4,10 @@ import shutil
 from tkinter import *
 from tkinter import filedialog
 from tkinter import ttk
+from tqdm import tqdm
 import PIL.Image
+# from progressbar import ProgressBar
+# pbar = ProgressBar()
 
 
 # import time
@@ -36,7 +39,7 @@ class Root(Tk):
     def fileDialog(self):
         self.filename = filedialog.askdirectory(initialdir="/", title="Select Folder")
         if self.filename != '/':
-            Files.dirName = self.filename.replace('/', '//')
+            Files.dirName = self.filename.replace('/', '\\')
         self.destroy()
 
 
@@ -45,9 +48,9 @@ def ig_f(dir, files):
 
 
 def createDirectories():
-    dirtree = Files.dirName.split('//')
+    dirtree = Files.dirName.split('\\')
     foldername = dirtree.pop(-1)
-    Files.newDir = '//'.join(dirtree) + '//Watermarked_' + foldername
+    Files.newDir = '\\'.join(dirtree) + '\\Watermarked_' + foldername
     print(Files.newDir)
     try:
         if not os.path.exists(Files.newDir):
@@ -103,11 +106,15 @@ def main():
         Files.listOfFiles += [os.path.join(dirpath, file) for file in filenames if
                               file.lower().endswith('jpg') or file.lower().endswith('jpeg')]
     # Add watermarks to these files:
+    for i in tqdm(Files.listOfFiles):
+        watermark_images(i)
+    '''TRIED WITH MULTIPROCESSING'''
+    '''!!!SHARED MEMORY PROBLEM!!!'''
     # print(mp.cpu_count())
-    p = mp.Pool(int(mp.cpu_count() / 2))
-    p.map(watermark_images, Files.listOfFiles)  # range(0,1000) if you want to replicate your example
-    p.close()
-    p.join()
+    # p = mp.Pool(int(mp.cpu_count() / 2))
+    # p.map(watermark_images, Files.listOfFiles)  # range(0,1000) if you want to replicate your example
+    # p.close()
+    # p.join()
     # end = time.time()
     # print(end - start)
     # watermark_images()
@@ -124,6 +131,7 @@ def watermark_images(file):
     save_dir = file.replace(Files.dirName, Files.newDir)
     # print(save_dir)
     final.convert('RGB').save(save_dir, format=None, quality=95)
+    im.close()
 
 
 if __name__ == '__main__':
