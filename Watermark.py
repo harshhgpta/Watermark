@@ -136,3 +136,6 @@ def watermark_images(file):
 
 if __name__ == '__main__':
     main()
+
+
+# pyinstaller --onefile Watermark.py
