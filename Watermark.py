@@ -8,6 +8,7 @@ from tqdm import tqdm
 import PIL.Image
 # from progressbar import ProgressBar
 # pbar = ProgressBar()
+from functools import partial
 
 
 # import time
@@ -106,15 +107,18 @@ def main():
         Files.listOfFiles += [os.path.join(dirpath, file) for file in filenames if
                               file.lower().endswith('jpg') or file.lower().endswith('jpeg')]
     # Add watermarks to these files:
-    for i in tqdm(Files.listOfFiles):
-        watermark_images(i)
+    # for i in tqdm(Files.listOfFiles):
+    #     watermark_images_temp(i)
     '''TRIED WITH MULTIPROCESSING'''
     '''!!!SHARED MEMORY PROBLEM!!!'''
     # print(mp.cpu_count())
-    # p = mp.Pool(int(mp.cpu_count() / 2))
-    # p.map(watermark_images, Files.listOfFiles)  # range(0,1000) if you want to replicate your example
-    # p.close()
-    # p.join()
+    p = mp.Pool(int(mp.cpu_count() / 2))
+    func = partial(watermark_images, Files.dirName, Files.newDir)
+    for _ in tqdm(p.imap_unordered(func, Files.listOfFiles), total=len(Files.listOfFiles)):
+        pass
+    # p.map(func, Files.listOfFiles)  # range(0,1000) if you want to replicate your example
+    p.close()
+    p.join()
     # end = time.time()
     # print(end - start)
     # watermark_images()
@@ -123,12 +127,17 @@ def main():
     #     print(elem)
 
 
-def watermark_images(file):
+# def watermark_images_temp(dirName, newDir, file):
+#     # print(file)
+#     save_dir = file.replace(dirName, newDir)
+#     print(save_dir)
+
+def watermark_images(dirName, newDir, file):
     # file.replace()
     # print(file)
     im = PIL.Image.open(file)
     final = watermark(im, Files.mark1, Files.mark2)
-    save_dir = file.replace(Files.dirName, Files.newDir)
+    save_dir = file.replace(dirName, newDir)
     # print(save_dir)
     final.convert('RGB').save(save_dir, format=None, quality=95)
     im.close()
