@@ -9,6 +9,7 @@ import PIL.Image
 # from progressbar import ProgressBar
 # pbar = ProgressBar()
 from functools import partial
+from threading import Thread
 
 
 # import time
@@ -144,6 +145,7 @@ def watermark_images(dirName, newDir, file):
 
 
 if __name__ == '__main__':
+    mp.freeze_support()
     main()
 
 # pyinstaller --onefile Watermark.py
